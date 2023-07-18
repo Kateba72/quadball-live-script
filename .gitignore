@@ -1,0 +1,10 @@
+venv/
+token/
+game_logs/
+scripts/
+
+__pycache__/
+
+log.txt
+
+secrets.py

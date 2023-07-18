@@ -1,0 +1,203 @@
+#:kivy 2.1.0
+
+<MainFrame>:
+    orientation: 'vertical'
+    size_hint: 1, 1
+    completed_games: completed_games
+    running_games: running_games
+    betting_modal: betting_modal
+    betting_text_input: betting_text_input
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        padding: 8
+        Button:
+            text: "Import Schedule <- Google"
+            background_color: 0.15, 0.25, 0.15
+            on_press: root.import_schedule()
+        Button:
+            text: "Export Schedule -> q.live"
+            background_color: 0.15, 0.25, 0.15
+            on_press: root.export_schedule()
+        Button:
+            text: "Export Results -> Google"
+            background_color: 0.15, 0.25, 0.15
+            on_press: root.export_results()
+        Button:
+            text: "Tippspiel"
+            background_color: 0.15, 0.25, 0.15
+            on_press: root.show_betting_form()
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: (60 * self.opacity)
+        opacity: 0
+        spacing: 10
+        padding: 8
+        id: betting_modal
+        Label:
+            text: "Name des Formulars"
+            size_hint_x: None
+            size: self.texture_size
+        TextInput:
+            id: betting_text_input
+        Button:
+            size_hint_x: None
+            width: self.texture_size[0] + 15
+            text: "Generieren"
+            background_color: 0.15, 1, 0.15, 1
+            on_press: root.create_betting_form()
+        Button:
+            size_hint_x: None
+            width: self.texture_size[0] + 15
+            text: "Abbrechen"
+            background_color: 1, 0.15, 0.15, 1
+            on_press: root.abort_betting_form()
+
+
+    ScrollView:
+        do_scroll_x: False
+        size_hint_y: None
+        height: min(scrolled_box and scrolled_box.height or 0, root.height)
+        effect_cls: 'ScrollEffect'
+        BoxLayout:
+            size_hint_y: None
+            orientation: 'vertical'
+            height: self.minimum_height
+            spacing: 5
+            id: scrolled_box
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.1, 0.1, 1
+                    Rectangle
+                        size: self.size
+                        pos: self.pos
+                size_hint_y: None
+                height: self.texture_size[1] + 10
+                text: "Completed Games"
+                font_size: 20
+            BoxLayout:
+                size_hint_y: None
+                height: self.minimum_height
+                id: completed_games
+                orientation: 'vertical'
+                padding_x: 10
+                Label:
+                    size_hint_y: None
+                    height: self.opacity and self.texture_size[1] or 0
+                    text: "(none)"
+                    opacity: len(completed_games.children) <= 1 and 1 or 0
+            Widget:
+                size_hint_y: None
+                height: 10
+            Label:
+                size_hint_y: None
+                height: self.texture_size[1] + 10
+                text: "Running Games"
+                font_size: 20
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.1, 0.1, 1
+                    Rectangle
+                        size: self.size
+                        pos: self.pos
+            BoxLayout:
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'
+                id: running_games
+                padding: 10, 5
+                Label:
+                    size_hint_y: None
+                    height: self.opacity and self.texture_size[1] or 0
+                    text: "(none)"
+                    opacity: len(running_games.children) <= 1 and 1 or 0
+    Widget:
+        size_hint_y: 1
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: [0, 50][bool(root.requesting_reset)]
+        opacity: int(bool(root.requesting_reset))
+        spacing: 10
+        padding: 8
+        canvas.before:
+            Color:
+                rgba: 1, 0.15, 0.15, 1
+            Rectangle
+                size: self.size
+                pos: self.pos
+        Label:
+            text_size: self.size[0], None
+            text: root.requesting_reset and f"Do you really want to reset the game {root.requesting_reset.team_a_name} – {root.requesting_reset.team_b_name}?" or ''
+        Button:
+            size_hint_x: None
+            width: self.texture_size[0] + 15
+            text: "Yes"
+            background_color: 0.15, 1, 0.15, 1
+            on_press: root.accept_reset()
+        Button:
+            size_hint_x: None
+            width: self.texture_size[0] + 15
+            text: "No"
+            background_color: 1, 0.15, 0.15, 1
+            on_press: root.deny_reset()
+
+
+
+<UIGame>:
+    size_hint_y: None
+    height: 60
+    orientation: 'horizontal'
+    padding: 12, 8
+    spacing: 20
+    button: button
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.15, 0.15, 1
+        RoundedRectangle:
+            radius: 5, 5
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: root.team_a_name
+                size_hint_x: None
+                size: self.texture_size
+            Widget:
+            Label:
+                text: root.team_a_score
+                size_hint_x: None
+                size: self.texture_size
+                color: root.score_color
+        Label:
+            text: ':'
+            size_hint_x: None
+            width: 10
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: root.team_b_score
+                size_hint_x: None
+                size: self.texture_size
+                color: root.score_color
+            Widget:
+            Label:
+                text: root.team_b_name
+                size_hint_x: None
+                size: self.texture_size
+    BoxLayout:
+        size_hint_x: None
+        width: 70
+        padding: 0, 7
+        Button:
+            text: root.button_text
+            background_color: root.button_color
+            on_press: root.button_pressed()
+            id: button
