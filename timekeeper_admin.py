@@ -170,14 +170,6 @@ Jetzt tippen unter {create_result['responderUri']}"""
             game.betting_form = create_result['responderUri']
         return text_response
 
-def generate_team_info(description):
-    if '(TBD)' in description:
-        description = description[:-6]
-        team = { "name": description, "shortname": description, "logo": "default.svg", "jersey": "jersey_ffffff" }
-    else:
-        team = secrets.TEAMS[description]
-    return team
-
 
 class Game:
     def __init__(self, row, index):
@@ -198,8 +190,8 @@ class Game:
         self.pitch = f"Pitch {row[1]}"
         self._game_info = {'basic': None}
         self.game_info = row[3]
-        self.team_a = generate_team_info(row[4])
-        self.team_b = generate_team_info(row[5])
+        self.team_a = self.generate_team_info(row[4])
+        self.team_b = self.generate_team_info(row[5])
         self.team_a_points = row[6]
         self.team_a_snitch = row[7]
         self.team_b_points = row[8]
@@ -320,6 +312,17 @@ class Game:
 
     def needs_betting_form(self):
         return (not self.betting_form) and (self.team_a.get('id')) and (self.team_b.get('id'))
+
+    def generate_team_info(self, description):
+        if '(TBD)' in description:
+            description = description[:-6]
+            team = { "name": description, "shortname": description, "logo": "default.svg", "jersey": "jersey_ffffff" }
+        else:
+            team = secrets.TEAMS[description]
+            if callable(team):
+                team = team(self)
+        return team
+
 
 class NoGame:
     def __init__(self, row, index):
